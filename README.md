@@ -13,7 +13,7 @@
   - [Tabla de Contenidos](#tabla-de-contenidos)
   - [Problema de Negocio](#problema-de-negocio)
   - [Solución Propuesta](#solución-propuesta)
-  - [🛠 Tecnologías Utilizadas](#-tecnologías-utilizadas)
+  - [Tecnologías Utilizadas](#tecnologías-utilizadas)
   - [Lógica de Matching](#lógica-de-matching)
   - [Instalación y Uso](#instalación-y-uso)
     - [Prerrequisitos](#prerrequisitos)
@@ -48,7 +48,7 @@ Esto permite:
 
 ---
 
-## 🛠 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 | Tecnología | Uso |
 |------------|-----|
