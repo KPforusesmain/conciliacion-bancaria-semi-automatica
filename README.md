@@ -47,7 +47,7 @@ Esto permite:
 
 ---
 
-## 🛠 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 | Tecnología | Uso |
 |------------|-----|
