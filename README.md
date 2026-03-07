@@ -2,19 +2,20 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
 [![Pandas](https://img.shields.io/badge/pandas-2.0%2B-green)](https://pandas.pydata.org/)
-[![License](https://img.shields.io/badge/license-MIT-orange)](LICENSE)
+[![RapidFuzz](https://img.shields.io/badge/RapidFuzz-3.0%2B-orange)](https://github.com/maxbachmann/RapidFuzz)
+[![License](https://img.shields.io/badge/license-MIT-purple)](LICENSE)
 
-**Automatización inteligente para conciliar movimientos bancarios con registros contables mediante reglas de matching por monto, fecha y similitud de texto.**
+**Automatización financiera inteligente para conciliar movimientos bancarios con registros contables mediante reglas de matching por monto, fecha y similitud de texto.**
 
 ---
 
 ## Tabla de Contenidos
 - [Conciliación Bancaria Semi-Automática](#conciliación-bancaria-semi-automática)
   - [Tabla de Contenidos](#tabla-de-contenidos)
+  - [Objetivo del Proyecto](#objetivo-del-proyecto)
   - [Problema de Negocio](#problema-de-negocio)
-  - [Solución Propuesta](#solución-propuesta)
-  - [Tecnologías Utilizadas](#tecnologías-utilizadas)
-  - [Lógica de Matching](#lógica-de-matching)
+  - [🛠 Tecnologías Utilizadas](#-tecnologías-utilizadas)
+  - [Funcionalidades](#funcionalidades)
   - [Instalación y Uso](#instalación-y-uso)
     - [Prerrequisitos](#prerrequisitos)
     - [Pasos](#pasos)
@@ -22,73 +23,82 @@
 
 ---
 
+## Objetivo del Proyecto
+
+Reducir el trabajo manual, mejorar la trazabilidad de diferencias y fortalecer el control interno a través de una conciliación semi-automatizada que clasifica los resultados en:
+
+| Categoría | Descripción |
+|-----------|-------------|
+| `matched` | Transacciones que coinciden en banco y contabilidad |
+| `review` | Coincidencias parciales que requieren análisis humano |
+| `unmatched` | Registros sin contraparte en el otro libro |
+
+---
+
 ## Problema de Negocio
 
-La conciliación bancaria manual es un proceso crítico pero tedioso que consume horas de trabajo del equipo financiero. Los principales desafíos son:
+La conciliación bancaria manual es un proceso crítico pero tedioso que presenta múltiples desafíos:
 
-- **Alto consumo de tiempo** en búsquedas y verificaciones.
-- **Errores humanos** que generan diferencias no detectadas.
-- **Retrasos** en el cierre contable y reportes financieros.
-- **Dificultad para identificar** partidas conciliadas vs. pendientes.
+- **Alto consumo de tiempo** en búsquedas y verificaciones manuales
+- **Errores humanos** por descripciones inconsistentes o diferencias de fecha
+- **Dificultad para detectar** partidas no registradas o registradas tarde
+- **Referencias incompletas** que dificultan el matching automático
+- **Baja trazabilidad** de diferencias en cierres contables
 
----
-
-## Solución Propuesta
-
-Este script automatiza parcialmente el proceso de conciliación, aplicando reglas de matching inteligentes para clasificar automáticamente las transacciones en:
-
-- **Conciliadas (Matched):** Coinciden en banco y contabilidad.
-- **No conciliadas (Unmatched):** Solo existen en uno de los dos libros.
-- **En revisión (Review):** Coinciden parcialmente (requieren validación humana).
-
-Esto permite:
-- Reducir el tiempo de conciliación en más del 70%.
-- Minimizar errores manuales.
-- Mejorar el control interno y la trazabilidad.
+Este proyecto propone una solución base **reutilizable y escalable** para apoyar cierres contables, revisión operativa y análisis de diferencias.
 
 ---
 
-## Tecnologías Utilizadas
+## 🛠 Tecnologías Utilizadas
 
 | Tecnología | Uso |
 |------------|-----|
 | ![Python](https://img.shields.io/badge/Python-3.8%2B-blue) | Lenguaje principal |
-| ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-green) | Procesamiento y comparación de datos |
+| ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-green) | Procesamiento y manipulación de datos |
+| ![RapidFuzz](https://img.shields.io/badge/RapidFuzz-Fuzzy%20Matching-orange) | Comparación difusa de texto |
+| ![OpenPyXL](https://img.shields.io/badge/OpenPyXL-Excel%20Export-yellow) | Generación de archivos Excel |
+| ![Matplotlib](https://img.shields.io/badge/Matplotlib-Visualization-red) | Creación de gráficos automáticos |
+| ![ReportLab](https://img.shields.io/badge/ReportLab-PDF%20Generation-purple) | Generación de reportes PDF |
 | ![CSV/Excel](https://img.shields.io/badge/CSV%2FExcel-Input%2FOutput-brightgreen) | Formatos de entrada/salida |
 | ![GitHub](https://img.shields.io/badge/GitHub-Version%20Control-black) | Control de versiones y colaboración |
+| ![VS Code](https://img.shields.io/badge/VS%20Code-IDE-blue) | Entorno de desarrollo |
 
 ---
 
+## Funcionalidades
+
+- **Lectura de archivos**: Soporte para bancarios y contables en formato CSV
+- **Limpieza de datos**: Normalización de formatos, fechas y montos
+- **Matching inteligente**: 
+  - Monto exacto
+  - Fecha con tolerancia configurable
+  - Similitud de texto con RapidFuzz
+- **Clasificación automática**:
+  - Matched: Coincidencia perfecta
+  - Review: Coincidencia parcial (requiere revisión)
+  - Unmatched: Sin coincidencia
+- **Generación de reportes**:
+  - CSV de resultados por categoría
+  - Excel consolidado con pestañas separadas
+  - Gráficos automáticos de distribución
+  - PDF ejecutivo con resumen y análisis
 
 ---
 
-## Lógica de Matching
-
-El algoritmo compara registros bancarios con contables usando tres niveles de matching:
-
-1. **Monto exacto** (condición obligatoria).
-2. **Fecha con tolerancia** (±3 días configurables).
-3. **Similitud de texto** (descripción, beneficiario, etc.) mediante [difflib](https://docs.python.org/3/library/difflib.html) o [fuzzywuzzy](https://github.com/seatgeek/fuzzywuzzy).
-
-**Prioridad de matching:**
-- Si coincide en monto, fecha y texto → **Conciliado**.
-- Si coincide en monto y fecha pero no en texto → **Revisión**.
-- Si coincide solo en monto → **Revisión** (con menor puntaje).
-- Si no hay coincidencia → **No conciliado**.
 
 ---
 
 ## Instalación y Uso
 
 ### Prerrequisitos
-- Python 3.8 o superior.
-- pip (gestor de paquetes).
+- Python 3.8 o superior
+- pip (gestor de paquetes)
 
 ### Pasos
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/KPforusesmain/conciliacion-bancaria.git
+   git clone https://github.com/tuusuario/conciliacion-bancaria.git
    cd conciliacion-bancaria
 
 ### Mejoras aplicadas:
