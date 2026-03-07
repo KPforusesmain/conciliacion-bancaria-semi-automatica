@@ -98,7 +98,7 @@ Este proyecto propone una solución base **reutilizable y escalable** para apoya
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/tuusuario/conciliacion-bancaria.git
+   git clone https://github.com/KPforusesmain/conciliacion-bancaria.git
    cd conciliacion-bancaria
 
 ### Mejoras aplicadas:
