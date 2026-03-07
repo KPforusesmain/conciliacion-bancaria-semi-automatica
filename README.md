@@ -18,6 +18,7 @@
   - [Instalación y Uso](#instalación-y-uso)
     - [Prerrequisitos](#prerrequisitos)
     - [Pasos](#pasos)
+    - [Mejoras aplicadas:](#mejoras-aplicadas)
 
 ---
 
@@ -47,7 +48,7 @@ Esto permite:
 
 ---
 
-## Tecnologías Utilizadas
+## 🛠 Tecnologías Utilizadas
 
 | Tecnología | Uso |
 |------------|-----|
@@ -89,3 +90,10 @@ El algoritmo compara registros bancarios con contables usando tres niveles de ma
    ```bash
    git clone https://github.com/tuusuario/conciliacion-bancaria.git
    cd conciliacion-bancaria
+
+### Mejoras aplicadas:
+1. **Estructura profesional:** Tabla de contenidos, secciones claras.
+2. **Formato atractivo:** Uso de emojis, badges, tablas.
+3. **Detalles técnicos:** Estructura de carpetas, lógica de matching explicada.
+4. **Usabilidad:** Instrucciones paso a paso, ejemplos de salida.
+5. **Escalabilidad:** Sección de mejoras futuras y contribuciones.
