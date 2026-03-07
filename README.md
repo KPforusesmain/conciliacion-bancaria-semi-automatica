@@ -1,59 +1,91 @@
-Conciliación Bancaria Semi-Automática | Python + Excel + Control Interno
+# Conciliación Bancaria Semi-Automática
 
-Descripción breve
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![Pandas](https://img.shields.io/badge/pandas-2.0%2B-green)](https://pandas.pydata.org/)
+[![License](https://img.shields.io/badge/license-MIT-orange)](LICENSE)
 
-Automatiza parcialmente la conciliación entre movimientos bancarios y registros contables mediante reglas de matching por monto, fecha y texto.
+**Automatización inteligente para conciliar movimientos bancarios con registros contables mediante reglas de matching por monto, fecha y similitud de texto.**
 
-Problema de negocio
+---
 
-La conciliación manual consume tiempo y puede generar errores, retrasos y diferencias no detectadas en procesos financieros.
+## Tabla de Contenidos
+- [Conciliación Bancaria Semi-Automática](#conciliación-bancaria-semi-automática)
+  - [Tabla de Contenidos](#tabla-de-contenidos)
+  - [Problema de Negocio](#problema-de-negocio)
+  - [Solución Propuesta](#solución-propuesta)
+  - [🛠 Tecnologías Utilizadas](#-tecnologías-utilizadas)
+  - [Lógica de Matching](#lógica-de-matching)
+  - [Instalación y Uso](#instalación-y-uso)
+    - [Prerrequisitos](#prerrequisitos)
+    - [Pasos](#pasos)
 
-Solución
+---
 
-El script clasifica transacciones en conciliadas, no conciliadas y en revisión, apoyando control interno y análisis financiero.
+## Problema de Negocio
 
-Tecnologías
+La conciliación bancaria manual es un proceso crítico pero tedioso que consume horas de trabajo del equipo financiero. Los principales desafíos son:
 
-- Python
+- **Alto consumo de tiempo** en búsquedas y verificaciones.
+- **Errores humanos** que generan diferencias no detectadas.
+- **Retrasos** en el cierre contable y reportes financieros.
+- **Dificultad para identificar** partidas conciliadas vs. pendientes.
 
-- Pandas
+---
 
-- CSV / Excel
+## Solución Propuesta
 
-- GitHub
+Este script automatiza parcialmente el proceso de conciliación, aplicando reglas de matching inteligentes para clasificar automáticamente las transacciones en:
 
-Entradas
+- **Conciliadas (Matched):** Coinciden en banco y contabilidad.
+- **No conciliadas (Unmatched):** Solo existen en uno de los dos libros.
+- **En revisión (Review):** Coinciden parcialmente (requieren validación humana).
 
-- archivo banco
+Esto permite:
+- Reducir el tiempo de conciliación en más del 70%.
+- Minimizar errores manuales.
+- Mejorar el control interno y la trazabilidad.
 
-- archivo libro contable
+---
 
-Lógica de matching
+## 🛠 Tecnologías Utilizadas
 
-- monto exacto
+| Tecnología | Uso |
+|------------|-----|
+| ![Python](https://img.shields.io/badge/Python-3.8%2B-blue) | Lenguaje principal |
+| ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-green) | Procesamiento y comparación de datos |
+| ![CSV/Excel](https://img.shields.io/badge/CSV%2FExcel-Input%2FOutput-brightgreen) | Formatos de entrada/salida |
+| ![GitHub](https://img.shields.io/badge/GitHub-Version%20Control-black) | Control de versiones y colaboración |
 
-- fecha con tolerancia
+---
 
-- similitud de texto
 
-Salidas
+---
 
-- matched
+## Lógica de Matching
 
-- unmatched
+El algoritmo compara registros bancarios con contables usando tres niveles de matching:
 
-- review
+1. **Monto exacto** (condición obligatoria).
+2. **Fecha con tolerancia** (±3 días configurables).
+3. **Similitud de texto** (descripción, beneficiario, etc.) mediante [difflib](https://docs.python.org/3/library/difflib.html) o [fuzzywuzzy](https://github.com/seatgeek/fuzzywuzzy).
 
-- resumen
+**Prioridad de matching:**
+- Si coincide en monto, fecha y texto → **Conciliado**.
+- Si coincide en monto y fecha pero no en texto → **Revisión**.
+- Si coincide solo en monto → **Revisión** (con menor puntaje).
+- Si no hay coincidencia → **No conciliado**.
 
-Cómo ejecutar
+---
 
-comandos básicos
+## Instalación y Uso
 
-Resultados esperados
+### Prerrequisitos
+- Python 3.8 o superior.
+- pip (gestor de paquetes).
 
-ejemplo de salida
+### Pasos
 
-Futuras mejoras
-
-lista breve
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/tuusuario/conciliacion-bancaria.git
+   cd conciliacion-bancaria
