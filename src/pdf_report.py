@@ -14,9 +14,9 @@ from reportlab.lib.units import cm
 class ConciliacionPDFGenerator:
     """Generador profesional de reportes de conciliación bancaria en PDF."""
 
-    MARGIN_X = 2.2 * cm
-    MARGIN_TOP = 2.0 * cm
-    MARGIN_BOTTOM = 1.8 * cm
+    MARGIN_X = 2.4 * cm
+    MARGIN_TOP = 1.7 * cm
+    MARGIN_BOTTOM = 1.5 * cm
 
     PAGE_WIDTH, PAGE_HEIGHT = A4
     CONTENT_WIDTH = PAGE_WIDTH - (2 * MARGIN_X)
@@ -117,11 +117,6 @@ class ConciliacionPDFGenerator:
 
         return y - (size_map[level] + 12)
 
-    def _draw_paragraph_line(self, text: str, x: float, y: float, font="regular", size=10, color="text"):
-        self.c.setFillColor(self.COLORS[color])
-        self.c.setFont(self.fonts[font], size)
-        self.c.drawString(x, y, text)
-
     def _draw_metric_card(self, label: str, value: str, x: float, y: float, width: float, color_key: str):
         card_height = 52
 
@@ -172,43 +167,47 @@ class ConciliacionPDFGenerator:
             self._draw_metric_card(label, value, x, y, card_width, color_key)
 
         total_rows = ((len(metrics_map) - 1) // cards_per_row) + 1
-        return y_position - total_rows * 64 - 10
+        return y_position - total_rows * 64 - 16
 
     def _draw_key_findings(self, y_position: float) -> float:
         y_position = self._draw_section_title("Hallazgos Clave", y_position, 2)
 
-        total_review = self._get_metric_value(self.summary_df, "total_review", 0)
-        total_unmatched_bank = self._get_metric_value(self.summary_df, "total_unmatched_banco", 0)
+        total_matched = int(self._safe_float(self._get_metric_value(self.summary_df, "total_matched", 0)))
+        total_review = int(self._safe_float(self._get_metric_value(self.summary_df, "total_review", 0)))
+        total_unmatched_bank = int(self._safe_float(self._get_metric_value(self.summary_df, "total_unmatched_banco", 0)))
         diferencia_neta = self._get_metric_value(self.summary_df, "diferencia_neta_pendiente", 0)
         avg_days = self._get_metric_value(self.summary_df, "promedio_diferencia_dias_matched", 0)
 
         findings = [
-            ("Conciliación automática", f"Se conciliaron {int(self._safe_float(self._get_metric_value(self.summary_df, 'total_matched', 0)))} transacciones con reglas de monto, fecha y similitud de texto.", "accent"),
-            ("Partidas en revisión", f"Existen {int(self._safe_float(total_review))} movimientos con coincidencia parcial que requieren validación manual.", "warning"),
-            ("Diferencias pendientes", f"Se detectaron {int(self._safe_float(total_unmatched_bank))} movimientos no conciliados del banco con diferencia neta de {self._format_money(diferencia_neta)}.", "danger"),
-            ("Eficiencia operativa", f"La diferencia promedio de fecha en coincidencias conciliadas es de {self._safe_float(avg_days):,.2f} días.", "secondary"),
+            ("Conciliación automática", f"Se conciliaron {total_matched} transacciones con reglas de monto, fecha y similitud de texto.", "accent"),
+            ("Partidas en revisión", f"Existen {total_review} movimientos con coincidencia parcial que requieren validación manual.", "warning"),
+            ("Diferencias pendientes", f"Se detectaron {total_unmatched_bank} movimientos no conciliados del banco con diferencia neta de {self._format_money(diferencia_neta)}.", "danger"),
+            ("Eficiencia operativa", f"La diferencia promedio de fecha en coincidencias conciliadas es de {self._safe_float(avg_days):.2f} días.", "secondary"),
         ]
 
-        row_height = 26
+        row_height = 30
+        title_x = self.MARGIN_X + 20
+        desc_x = self.MARGIN_X + 165
+
         for i, (title, desc, color_key) in enumerate(findings):
             y = y_position - i * row_height
 
             if i % 2 == 0:
                 self.c.setFillColor(self.COLORS["light"])
-                self.c.roundRect(self.MARGIN_X, y - 18, self.CONTENT_WIDTH, 20, 4, fill=1, stroke=0)
+                self.c.roundRect(self.MARGIN_X, y - 20, self.CONTENT_WIDTH, 22, 4, fill=1, stroke=0)
 
             self.c.setFillColor(self.COLORS[color_key])
-            self.c.circle(self.MARGIN_X + 8, y - 8, 3, fill=1, stroke=0)
+            self.c.circle(self.MARGIN_X + 9, y - 9, 3, fill=1, stroke=0)
 
             self.c.setFillColor(self.COLORS["text"])
-            self.c.setFont(self.fonts["bold"], 9.5)
-            self.c.drawString(self.MARGIN_X + 18, y - 4, title)
+            self.c.setFont(self.fonts["bold"], 9.2)
+            self.c.drawString(title_x, y - 5, title)
 
             self.c.setFillColor(self.COLORS["muted"])
-            self.c.setFont(self.fonts["regular"], 9)
-            self.c.drawString(self.MARGIN_X + 120, y - 4, desc[:85])
+            self.c.setFont(self.fonts["regular"], 8.8)
+            self.c.drawString(desc_x, y - 5, desc[:74])
 
-        return y_position - len(findings) * row_height - 14
+        return y_position - len(findings) * row_height - 10
 
     def _draw_control_notes(self, y_position: float) -> float:
         y_position = self._draw_section_title("Observaciones de Control Interno", y_position, 2)
@@ -220,19 +219,19 @@ class ConciliacionPDFGenerator:
             "Evaluar reglas adicionales para comisiones, ajustes y duplicados.",
         ]
 
+        box_height = 78
         self.c.setFillColor(self.COLORS["lighter"])
-        box_height = 68
         self.c.roundRect(self.MARGIN_X, y_position - box_height, self.CONTENT_WIDTH, box_height, 6, fill=1, stroke=0)
 
         self.c.setFillColor(self.COLORS["text"])
-        self.c.setFont(self.fonts["regular"], 9.5)
+        self.c.setFont(self.fonts["regular"], 9.2)
 
-        line_y = y_position - 14
+        line_y = y_position - 16
         for note in notes:
             self.c.drawString(self.MARGIN_X + 12, line_y, f"• {note}")
-            line_y -= 14
+            line_y -= 15
 
-        return y_position - box_height - 12
+        return y_position - box_height - 8
 
     def _normalize_table_rows(
         self,
@@ -240,9 +239,6 @@ class ConciliacionPDFGenerator:
         mappings: List[Tuple[str, str]],
         max_rows: int = 8,
     ) -> List[List[str]]:
-        """
-        mappings: [(header_visible, real_column_name), ...]
-        """
         table_data = [[header for header, _ in mappings]]
 
         if df is None or df.empty:
@@ -252,7 +248,7 @@ class ConciliacionPDFGenerator:
 
         for _, row in preview.iterrows():
             row_data = []
-            for visible_name, real_col in mappings:
+            for _, real_col in mappings:
                 if real_col not in preview.columns:
                     row_data.append("N/A")
                     continue
@@ -269,7 +265,10 @@ class ConciliacionPDFGenerator:
                     value = str(value)
                 else:
                     text = str(value)
-                    value = text[:34] + "..." if len(text) > 34 else text
+                    if "descripcion" in real_col.lower():
+                        value = text[:26] + "..." if len(text) > 26 else text
+                    else:
+                        value = text[:34] + "..." if len(text) > 34 else text
 
                 row_data.append(value)
             table_data.append(row_data)
@@ -285,7 +284,7 @@ class ConciliacionPDFGenerator:
         max_rows: int = 8,
     ) -> float:
         y_position = self._draw_section_title(title, y_position, 3)
-        y_position -= 6
+        y_position -= 14
 
         if df is None or df.empty:
             self.c.setFillColor(self.COLORS["muted"])
@@ -294,35 +293,54 @@ class ConciliacionPDFGenerator:
             return y_position - 20
 
         table_data = self._normalize_table_rows(df, mappings, max_rows=max_rows)
-        num_cols = len(mappings)
+        headers = [header for header, _ in mappings]
 
-        col_widths = [self.CONTENT_WIDTH / num_cols] * num_cols
+        if headers == ["Fecha Banco", "Descripción Banco", "Monto Banco", "Score Texto", "Dif. Días"]:
+            col_widths = [
+                self.CONTENT_WIDTH * 0.18,
+                self.CONTENT_WIDTH * 0.34,
+                self.CONTENT_WIDTH * 0.20,
+                self.CONTENT_WIDTH * 0.16,
+                self.CONTENT_WIDTH * 0.12,
+            ]
+        elif headers == ["Fecha Banco", "Descripción Banco", "Monto Banco"]:
+            col_widths = [
+                self.CONTENT_WIDTH * 0.20,
+                self.CONTENT_WIDTH * 0.48,
+                self.CONTENT_WIDTH * 0.32,
+            ]
+        else:
+            num_cols = len(mappings)
+            col_widths = [self.CONTENT_WIDTH / num_cols] * num_cols
+
         table = Table(table_data, colWidths=col_widths)
 
         table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), self.COLORS["primary"]),
             ("TEXTCOLOR", (0, 0), (-1, 0), self.COLORS["white"]),
             ("FONTNAME", (0, 0), (-1, 0), self.fonts["bold"]),
-            ("FONTSIZE", (0, 0), (-1, 0), 8.5),
+            ("FONTSIZE", (0, 0), (-1, 0), 8.3),
             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 7),
-            ("TOPPADDING", (0, 0), (-1, 0), 7),
+            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+            ("TOPPADDING", (0, 0), (-1, 0), 8),
+            ("BOTTOMPADDING", (0, 1), (-1, -1), 6),
+            ("TOPPADDING", (0, 1), (-1, -1), 6),
             ("BACKGROUND", (0, 1), (-1, -1), self.COLORS["white"]),
             ("TEXTCOLOR", (0, 1), (-1, -1), self.COLORS["text"]),
             ("FONTNAME", (0, 1), (-1, -1), self.fonts["regular"]),
-            ("FONTSIZE", (0, 1), (-1, -1), 7.8),
+            ("FONTSIZE", (0, 1), (-1, -1), 7.6),
             ("GRID", (0, 0), (-1, -1), 0.35, self.COLORS["mid"]),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [self.COLORS["white"], self.COLORS["light"]]),
-            ("LEFTPADDING", (0, 0), (-1, -1), 5),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
         ]))
 
-        estimated_height = len(table_data) * 18
+        estimated_height = len(table_data) * 21
         table.wrapOn(self.c, self.MARGIN_X, y_position)
         table.drawOn(self.c, self.MARGIN_X, y_position - estimated_height)
 
-        return y_position - estimated_height - 16
+        return y_position - estimated_height - 18
 
     def _draw_chart(self, chart_path: str, x: float, y: float, width: float, height: float, title: str = ""):
         if chart_path and Path(chart_path).exists():
@@ -363,24 +381,23 @@ class ConciliacionPDFGenerator:
         y = self._draw_key_findings(y)
         y = self._draw_control_notes(y)
 
-        # gráficos
-        chart_y = 210
-        half_width = (self.CONTENT_WIDTH / 2) - 10
+        chart_y = 255
+        half_width = (self.CONTENT_WIDTH / 2) - 8
 
         self._draw_chart(
             chart_paths.get("status_chart"),
             self.MARGIN_X,
             chart_y,
             half_width,
-            130,
+            135,
             "Distribución de Estados",
         )
         self._draw_chart(
             chart_paths.get("amount_chart"),
-            self.MARGIN_X + half_width + 20,
+            self.MARGIN_X + half_width + 16,
             chart_y,
             half_width,
-            130,
+            135,
             "Montos por Estado",
         )
 
@@ -393,7 +410,7 @@ class ConciliacionPDFGenerator:
 
         y = self.PAGE_HEIGHT - self.MARGIN_TOP
         y = self._draw_section_title("Partidas Pendientes de Análisis", y, 1)
-        y -= 6
+        y -= 14
 
         review_mappings = [
             ("Fecha Banco", "fecha_banco"),
@@ -417,7 +434,7 @@ class ConciliacionPDFGenerator:
             max_rows=8,
         )
 
-        y -= 10
+        y -= 22
 
         y = self._draw_transactions_table(
             "Transacciones No Conciliadas - Banco",
